@@ -18,12 +18,12 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    dir('atmservice') {  // 💡 Run Maven inside "atmservice" folder
-                        sh 'mvn clean package'  // Builds the WAR file
+                    dir('atmservice') {  
+                        sh 'mvn clean package'  
                     }
                 }
             }
-        }
+        } // ✅ Fixed: Closing brace for "Build" stage
 
         stage('Deploy to Tomcat') {
             steps {
@@ -41,3 +41,16 @@ pipeline {
                     echo "Deployment successful!"
                     """
                 }
+            }
+        }
+    } // ✅ Fixed: Missing closing brace for "stages" block
+
+    post {
+        success {
+            echo '✅ Build and Deployment Successful!'
+        }
+        failure {
+            echo '❌ Build or Deployment Failed!'
+        }
+    }
+}
