@@ -29,14 +29,9 @@ pipeline {
             steps {
                 script {
                     sh """
-                    echo "Stopping Tomcat..."
-                    systemctl stop tomcat
 
                     echo "Copying WAR file to Tomcat webapps directory..."
                     cp -f ${WAR_FILE} ${TOMCAT_WEBAPPS}
-
-                    echo "Starting Tomcat..."
-                    systemctl start tomcat
 
                     echo "Deployment successful!"
                     """
