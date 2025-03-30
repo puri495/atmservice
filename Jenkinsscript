@@ -29,10 +29,15 @@ pipeline {
             steps {
                 script {
                     sh """
-
+                    echo "Stopping Tomcat..."
+                    sudo systemctl stop tomcat
+        
                     echo "Copying WAR file to Tomcat webapps directory..."
-                    cp -f ${WAR_FILE} ${TOMCAT_WEBAPPS}
-
+                    sudo cp -f atmservice/target/atmservice.war /opt/tomcat/webapps/
+        
+                    echo "Starting Tomcat..."
+                    sudo systemctl start tomcat
+        
                     echo "Deployment successful!"
                     """
                 }
