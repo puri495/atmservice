@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ATM Service</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to ATM Service</h1>
+
+        <!-- Create Account Form -->
+        <div id="createAccount">
+            <h2>Create Account</h2>
+            <input type="text" id="newUser" placeholder="Enter Username" required>
+            <input type="password" id="newPin" placeholder="Enter 4-digit PIN" required>
+            <input type="number" id="initialDeposit" placeholder="Initial Deposit" required>
+            <button onclick="createAccount()">Create Account</button>
+        </div>
+
+        <!-- Login Form -->
+        <div id="login">
+            <h2>Login</h2>
+            <input type="text" id="loginUser" placeholder="Enter Username" required>
+            <input type="password" id="loginPin" placeholder="Enter PIN" required>
+            <button onclick="login()">Login</button>
+        </div>
+
+        <!-- ATM Operations -->
+        <div id="operations" style="display: none;">
+            <h2>ATM Operations</h2>
+            <button onclick="checkBalance()">Check Balance</button>
+            <input type="number" id="withdrawAmount" placeholder="Withdraw Amount">
+            <button onclick="withdraw()">Withdraw</button>
+            <input type="number" id="depositAmount" placeholder="Deposit Amount">
+            <button onclick="deposit()">Deposit</button>
+            <button onclick="logout()">Logout</button>
+        </div>
+
+        <p id="message"></p>
+    </div>
+
+    <script src="app.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #f5f5f5;
+        }
+        .container {
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            background: #ffffff;
+            max-width: 400px;
+            text-align: center;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        input, button {
+            margin: 10px 0;
+            padding: 10px;
+            width: 90%;
+        }
+        button {
+            cursor: pointer;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        #message {
+            color: red;
+        }
+    </style>
+
+    <script>
+        async function request(action, data) {
+            const response = await fetch("ATMService", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams({ action, ...data })
+            });
+            return response.text();
+        }
+
+        async function createAccount() {
+            const user = document.getElementById("newUser").value;
+            const pin = document.getElementById("newPin").value;
+            const balance = document.getElementById("initialDeposit").value;
+
+            const message = await request("createAccount", { user, pin, balance });
+            document.getElementById("message").textContent = message;
+        }
+
+        async function login() {
+            const user = document.getElementById("loginUser").value;
+            const pin = document.getElementById("loginPin").value;
+
+            const message = await request("login", { user, pin });
+
+            if (message.includes("Successful")) {
+                document.getElementById("login").style.display = "none";
+                document.getElementById("operations").style.display = "block";
+                sessionStorage.setItem("user", user);
+            }
+            document.getElementById("message").textContent = message;
+        }
+
+        async function checkBalance() {
+            const user = sessionStorage.getItem("user");
+            const message = await request("checkBalance", { user });
+            alert(message);
+        }
+
+        async function withdraw() {
+            const user = sessionStorage.getItem("user");
+            const amount = document.getElementById("withdrawAmount").value;
+            const message = await request("withdraw", { user, amount });
+            alert(message);
+        }
+
+        async function deposit() {
+            const user = sessionStorage.getItem("user");
+            const amount = document.getElementById("depositAmount").value;
+            const message = await request("deposit", { user, amount });
+            alert(message);
+        }
+
+        function logout() {
+            sessionStorage.removeItem("user");
+            location.reload();
+        }
+    </script>
+
+</body>
+</html>
+

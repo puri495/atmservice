@@ -1,0 +1,11 @@
+<web-app xmlns="http://jakarta.ee/xml/ns/jakartaee" version="5.0">
+    <servlet>
+        <servlet-name>ATMService</servlet-name>
+        <servlet-class>com.nativeatm.ATMService</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ATMService</servlet-name>
+        <url-pattern>/ATMService</url-pattern>
+    </servlet-mapping>
+</web-app>
+
