@@ -4,7 +4,7 @@ pipeline {
     environment {
         REPO_URL = 'https://github.com/puri495/atmservice.git'
         BRANCH = 'main'
-        WAR_FILE = 'target/atmservice.war'
+        WAR_FILE = 'atmservice/target/atmservice.war'
         TOMCAT_WEBAPPS = '/opt/tomcat/webapps'
     }
 
@@ -19,7 +19,8 @@ pipeline {
             steps {
                 script {
                     dir('atmservice') {  // 💡 Run Maven inside "atmservice" folder
-                    sh 'mvn clean package'  // Builds the WAR file
+                        sh 'mvn clean package'  // Builds the WAR file
+                    }
                 }
             }
         }
@@ -40,17 +41,3 @@ pipeline {
                     echo "Deployment successful!"
                     """
                 }
-            }
-        }
-    }
-
-    post {
-        success {
-            echo '✅ Build and Deployment Successful!'
-        }
-        failure {
-            echo '❌ Build or Deployment Failed!'
-        }
-    }
-}
-
