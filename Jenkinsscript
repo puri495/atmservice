@@ -1,0 +1,55 @@
+pipeline {
+    agent any
+
+    environment {
+        REPO_URL = 'https://github.com/puri495/atmservice.git'
+        BRANCH = 'main'
+        WAR_FILE = 'target/atmservice.war'
+        TOMCAT_WEBAPPS = '/opt/tomcat/webapps'
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: "${BRANCH}", url: "${REPO_URL}"
+            }
+        }
+
+        stage('Build') {
+            steps {
+                script {
+                    sh 'mvn clean package'  // Builds the WAR file
+                }
+            }
+        }
+
+        stage('Deploy to Tomcat') {
+            steps {
+                script {
+                    sh """
+                    echo "Stopping Tomcat..."
+                    systemctl stop tomcat
+
+                    echo "Copying WAR file to Tomcat webapps directory..."
+                    cp -f ${WAR_FILE} ${TOMCAT_WEBAPPS}
+
+                    echo "Starting Tomcat..."
+                    systemctl start tomcat
+
+                    echo "Deployment successful!"
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Build and Deployment Successful!'
+        }
+        failure {
+            echo '❌ Build or Deployment Failed!'
+        }
+    }
+}
+
