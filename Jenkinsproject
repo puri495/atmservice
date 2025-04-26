@@ -1,0 +1,98 @@
+pipeline {
+    agent any
+
+    environment {
+        // Define environment variables
+        BITBUCKET_CREDENTIALS = credentials('bitbucket-credentials-id')
+        SONARQUBE_HOST_URL = 'http://your-sonarqube-server'
+        SONARQUBE_LOGIN = 'your-sonarqube-token'
+        AWS_CREDENTIALS = credentials('aws-credentials-id')
+        S3_BUCKET = 'your-s3-bucket-name'
+        MAVEN_OPTS = '-Djava.awt.headless=true'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Checkout code from the PA_5.7 branch in Bitbucket
+                git(
+                    branch: 'PA_5.7',
+                    url: 'https://bitbucket.org/your-repository.git',
+                    credentialsId: BITBUCKET_CREDENTIALS
+                )
+            }
+        }
+
+        stage('Compile') {
+            steps {
+                // Compile the code using Maven
+                script {
+                    withMaven(maven: 'M3') {
+                        sh 'mvn clean compile'
+                    }
+                }
+            }
+        }
+
+        stage('Test') {
+            steps {
+                // Run tests using Maven
+                script {
+                    withMaven(maven: 'M3') {
+                        sh 'mvn test'
+                    }
+                }
+            }
+        }
+
+        stage('Code Quality and Coverage Analysis') {
+            steps {
+                // Run SonarQube analysis
+                script {
+                    withMaven(maven: 'M3') {
+                        sh """
+                        mvn sonar:sonar \
+                            -Dsonar.host.url=${env.SONARQUBE_HOST_URL} \
+                            -Dsonar.login=${env.SONARQUBE_LOGIN}
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Build and Package') {
+            steps {
+                // Build and package the application using Maven
+                script {
+                    withMaven(maven: 'M3') {
+                        sh 'mvn package'
+                    }
+                }
+            }
+        }
+
+        stage('Upload to S3') {
+            steps {
+                // Upload the artifact to S3
+                withAWS(credentials: 'aws-credentials-id', region: 'your-region') {
+                    s3Upload(
+                        bucket: S3_BUCKET,
+                        path: 'your-artifact-path',
+                        file: 'target/your-artifact.jar'
+                    )
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            // Actions to perform on successful build
+            echo 'Build, test, and deployment succeeded!'
+        }
+        failure {
+            // Actions to perform on failed build
+            echo 'Build, test, or deployment failed!'
+        }
+    }
+}
